@@ -1,0 +1,41 @@
+plugins {
+    id 'java'
+}
+
+group 'com.zhang'
+version '5.2.23.BUILD-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'com.alibaba', name: 'druid', version: '1.1.16'
+    compile(project(":spring-aop"))
+    compile(project(":spring-beans"))
+    compile(project(":spring-context"))
+    compile(project(":spring-core"))
+    compile(testFixtures(project(":spring-aop")))
+    compile(testFixtures(project(":spring-beans")))
+    compile(testFixtures(project(":spring-core")))
+    compile(testFixtures(project(":spring-tx")))
+    compile(project(":spring-expression"))
+    compile(project(":spring-jdbc"))
+    compile(project(":spring-orm"))
+    compile(project(":spring-test"))
+    compile(project(":spring-tx"))
+    compile(project(":spring-web"))
+    compile("javax.inject:javax.inject")
+    compile("javax.resource:javax.resource-api")
+    compile("javax.servlet:javax.servlet-api")
+    compile("org.aspectj:aspectjweaver")
+    compile("org.hsqldb:hsqldb")
+    compile("org.hibernate:hibernate-core")
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    implementation 'mysql:mysql-connector-java:8.0.28'
+}
+
+test {
+    useJUnitPlatform()
+}

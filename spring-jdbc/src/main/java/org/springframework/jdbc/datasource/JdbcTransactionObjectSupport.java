@@ -16,21 +16,15 @@
 
 package org.springframework.jdbc.datasource;
 
-import java.sql.SQLException;
-import java.sql.Savepoint;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.lang.Nullable;
-import org.springframework.transaction.CannotCreateTransactionException;
-import org.springframework.transaction.NestedTransactionNotSupportedException;
-import org.springframework.transaction.SavepointManager;
-import org.springframework.transaction.TransactionException;
-import org.springframework.transaction.TransactionSystemException;
-import org.springframework.transaction.TransactionUsageException;
+import org.springframework.transaction.*;
 import org.springframework.transaction.support.SmartTransactionObject;
 import org.springframework.util.Assert;
+
+import java.sql.SQLException;
+import java.sql.Savepoint;
 
 /**
  * Convenient base class for JDBC-aware transaction objects. Can contain a
@@ -164,23 +158,23 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 		}
 	}
 
-	/**
+	/** 内部就是获取连接对象，然后调用rollback回滚到保存点，然后重置连接持有器的回滚标记为false
 	 * This implementation rolls back to the given JDBC 3.0 Savepoint.
 	 * @see java.sql.Connection#rollback(java.sql.Savepoint)
 	 */
 	@Override
 	public void rollbackToSavepoint(Object savepoint) throws TransactionException {
 		ConnectionHolder conHolder = getConnectionHolderForSavepoint();
-		try {
+		try {// 回滚到保存点
 			conHolder.getConnection().rollback((Savepoint) savepoint);
-			conHolder.resetRollbackOnly();
+			conHolder.resetRollbackOnly();// 重置回滚标记，不需要回滚
 		}
 		catch (Throwable ex) {
 			throw new TransactionSystemException("Could not roll back to JDBC savepoint", ex);
 		}
 	}
 
-	/**
+	/** JDBC连接释放保存点
 	 * This implementation releases the given JDBC 3.0 Savepoint.
 	 * @see java.sql.Connection#releaseSavepoint
 	 */

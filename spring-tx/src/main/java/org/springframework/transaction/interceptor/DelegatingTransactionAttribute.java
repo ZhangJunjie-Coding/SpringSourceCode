@@ -16,10 +16,10 @@
 
 package org.springframework.transaction.interceptor;
 
-import java.io.Serializable;
-
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.DelegatingTransactionDefinition;
+
+import java.io.Serializable;
 
 /**
  * {@link TransactionAttribute} implementation that delegates all calls to a given target
@@ -52,7 +52,7 @@ public abstract class DelegatingTransactionAttribute extends DelegatingTransacti
 	public String getQualifier() {
 		return this.targetAttribute.getQualifier();
 	}
-
+	// 判断是否可以回滚
 	@Override
 	public boolean rollbackOn(Throwable ex) {
 		return this.targetAttribute.rollbackOn(ex);
