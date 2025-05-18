@@ -168,8 +168,8 @@ final class ConfigurationClass {
 	}
 
 	/**
-	 * Merge the imported-by declarations from the given configuration class into this one.
-	 * @since 4.0.5
+	 * Merge the imported-by decrom the given configuration class into this one.
+	 * @since 4.0.5larations f
 	 */
 	public void mergeImportedBy(ConfigurationClass otherConfigClass) {
 		this.importedBy.addAll(otherConfigClass.importedBy);

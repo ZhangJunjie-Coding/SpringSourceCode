@@ -22,6 +22,10 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.lang.Nullable;
 
 /**
+ * 此接口是spring中导入外部配置的核心接口,根据给定的条件（通常是一个或多个注解属性）判断导入哪个配置
+ * 如果该接口的实现类同时实现了一些Aware接口，那么在调用selectImports方法之前先调用上述接口中的回调方法
+ * 如果需要在所有的@Configuration处理完再导入，可以实现DeferredImportSelector接口
+ *
  * Interface to be implemented by types that determine which @{@link Configuration}
  * class(es) should be imported based on a given selection criteria, usually one or
  * more annotation attributes.
@@ -52,17 +56,18 @@ import org.springframework.lang.Nullable;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
- * @since 3.1
  * @see DeferredImportSelector
  * @see Import
  * @see ImportBeanDefinitionRegistrar
  * @see Configuration
+ * @since 3.1
  */
 public interface ImportSelector {
 
 	/**
 	 * Select and return the names of which class(es) should be imported based on
 	 * the {@link AnnotationMetadata} of the importing @{@link Configuration} class.
+	 *
 	 * @return the class names, or an empty array if none
 	 */
 	String[] selectImports(AnnotationMetadata importingClassMetadata);
@@ -73,6 +78,7 @@ public interface ImportSelector {
 	 * <p>If this predicate returns {@code true} for a given fully-qualified
 	 * class name, said class will not be considered as an imported configuration
 	 * class, bypassing class file loading as well as metadata introspection.
+	 *
 	 * @return the filter predicate for fully-qualified candidate class names
 	 * of transitively imported configuration classes, or {@code null} if none
 	 * @since 5.2.4

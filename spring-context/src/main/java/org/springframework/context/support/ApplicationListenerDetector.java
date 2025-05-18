@@ -16,12 +16,8 @@
 
 package org.springframework.context.support;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -30,7 +26,13 @@ import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
+ * 用来检测bean是否实现了ApplicationListener接口，两个作用：
+ * 	1、实例化之后，如果bean的单例并且属于ApplicationListener接口，则加入到多播器中
+ * 	2、bean销毁之前，如果bean是一个applicationListener,则从多播器中提前删除
  * {@code BeanPostProcessor} that detects beans which implement the {@code ApplicationListener}
  * interface. This catches beans that can't reliably be detected by {@code getBeanNamesForType}
  * and related operations which only work against top-level beans.
@@ -56,7 +58,7 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 		this.applicationContext = applicationContext;
 	}
 
-
+	// singletonNames保存了所有将要创建的bean名称以及这个bean是否是单例的映射关系，这个方法会在对象被创建出来后，属性注入之前执行
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		if (ApplicationListener.class.isAssignableFrom(beanType)) {
@@ -64,11 +66,18 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 		}
 	}
 
+	/**
+	 * 不做任何处理，直接返回对象
+	 * @param bean the new bean instance
+	 * @param beanName the name of the bean
+	 * @return
+	 */
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) {
 		return bean;
 	}
 
+	// 将我们自定义的单例类作为监听器添加到applicationEventMulticaster中
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		if (bean instanceof ApplicationListener) {

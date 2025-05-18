@@ -106,19 +106,27 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		Assert.notNull(bean, "Disposable bean must not be null");
 		this.bean = bean;
 		this.beanName = beanName;
+		// bean是否是DisposableBean的实例 && 'destroy'没有受外部管理的销毁方法
 		this.invokeDisposableBean = (bean instanceof DisposableBean &&
 				!beanDefinition.isExternallyManagedDestroyMethod(DESTROY_METHOD_NAME));
+		// beanDefinition是否允许访问非公共构造函数和方法
 		this.nonPublicAccessAllowed = beanDefinition.isNonPublicAccessAllowed();
 		this.acc = acc;
 
+		// 根据需要推断破坏方法名
 		String destroyMethodName = inferDestroyMethodIfNecessary(bean, beanDefinition);
+		// 如果destroyMethodName不为nuLL&&(bean是否是DisposableBean实例&'destroy没有受外部管理的销毁方法
+		// &destroyMethodName是'destroy')&&destroyMethodName不是外部受管理的销毁方法
 		if (destroyMethodName != null &&
 				!(this.invokeDisposableBean && DESTROY_METHOD_NAME.equals(destroyMethodName)) &&
 				!beanDefinition.isExternallyManagedDestroyMethod(destroyMethodName)) {
 
 			this.destroyMethodName = destroyMethodName;
+			// 根据beanDefinition是否允许访问非公共构造函数和方法的情况来查找最小参数（最好是none)的销毁方法对象
 			Method destroyMethod = determineDestroyMethod(destroyMethodName);
+			// 如果destroyMethod为null
 			if (destroyMethod == null) {
+				//如果beanDefinition配置的destroy方法为默认方法
 				if (beanDefinition.isEnforceDestroyMethod()) {
 					throw new BeanDefinitionValidationException("Could not find a destroy method named '" +
 							destroyMethodName + "' on bean with name '" + beanName + "'");
@@ -126,21 +134,25 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			}
 			else {
 				if (destroyMethod.getParameterCount() > 0) {
+					// 获取destroyMethod的参数类型数组
 					Class<?>[] paramTypes = destroyMethod.getParameterTypes();
+					// 如果参数类型数组大于1
 					if (paramTypes.length > 1) {
 						throw new BeanDefinitionValidationException("Method '" + destroyMethodName + "' of bean '" +
 								beanName + "' has more than one parameter - not supported as destroy method");
 					}
+					// 参数类型数组为1 && 第一个参数类型不是Boolean类
 					else if (paramTypes.length == 1 && boolean.class != paramTypes[0]) {
 						throw new BeanDefinitionValidationException("Method '" + destroyMethodName + "' of bean '" +
 								beanName + "' has a non-boolean parameter - not supported as destroy method");
 					}
 				}
+				// 获取destroyMethod相应的接口方法对象，如果找不到，则返回原始方法
 				destroyMethod = ClassUtils.getInterfaceMethodIfPossible(destroyMethod);
 			}
 			this.destroyMethod = destroyMethod;
 		}
-
+		// 搜索列表中的所有可支持Bean销毁的DestructionAwareBeanPostProcessor
 		this.beanPostProcessors = filterPostProcessors(postProcessors, bean);
 	}
 
