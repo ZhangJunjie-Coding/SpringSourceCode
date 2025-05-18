@@ -202,7 +202,6 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 
 	private final ResourceLoader resourceLoader;
-
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
 

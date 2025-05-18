@@ -16,48 +16,20 @@
 
 package org.springframework.cglib.proxy;
 
+import org.springframework.asm.ClassVisitor;
+import org.springframework.asm.Label;
+import org.springframework.asm.Type;
+import org.springframework.cglib.core.*;
+
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.ProtectionDomain;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import org.springframework.asm.ClassVisitor;
-import org.springframework.asm.Label;
-import org.springframework.asm.Type;
-import org.springframework.cglib.core.AbstractClassGenerator;
-import org.springframework.cglib.core.ClassEmitter;
-import org.springframework.cglib.core.CodeEmitter;
-import org.springframework.cglib.core.CodeGenerationException;
-import org.springframework.cglib.core.CollectionUtils;
-import org.springframework.cglib.core.Constants;
-import org.springframework.cglib.core.DuplicatesPredicate;
-import org.springframework.cglib.core.EmitUtils;
-import org.springframework.cglib.core.KeyFactory;
-import org.springframework.cglib.core.Local;
-import org.springframework.cglib.core.MethodInfo;
-import org.springframework.cglib.core.MethodInfoTransformer;
-import org.springframework.cglib.core.MethodWrapper;
-import org.springframework.cglib.core.ObjectSwitchCallback;
-import org.springframework.cglib.core.ProcessSwitchCallback;
-import org.springframework.cglib.core.ReflectUtils;
-import org.springframework.cglib.core.RejectModifierPredicate;
-import org.springframework.cglib.core.Signature;
-import org.springframework.cglib.core.Transformer;
-import org.springframework.cglib.core.TypeUtils;
-import org.springframework.cglib.core.VisibilityPredicate;
-import org.springframework.cglib.core.WeakCacheKey;
-
-/**
+/**a
  * Generates dynamic subclasses to enable method interception. This
  * class started as a substitute for the standard Dynamic Proxy support
  * included with JDK 1.3, but one that allowed the proxies to extend a
@@ -99,7 +71,7 @@ public class Enhancer extends AbstractClassGenerator {
 	};
 
 	private static final Source SOURCE = new Source(Enhancer.class.getName());
-
+	// 使用key工厂创建出对应class的代理类，后面KeyFactory_HASH_TYPE即代理类中创建HashCode方法的策略
 	private static final EnhancerKey KEY_FACTORY =
 			(EnhancerKey) KeyFactory.create(EnhancerKey.class, KeyFactory.HASH_ASM_TYPE, null);
 
@@ -429,6 +401,7 @@ public class Enhancer extends AbstractClassGenerator {
 
 	private void preValidate() {
 		if (callbackTypes == null) {
+			//  确定传入的callback类型
 			callbackTypes = CallbackInfo.determineTypes(callbacks, false);
 			validateCallbackTypes = true;
 		}
@@ -560,7 +533,9 @@ public class Enhancer extends AbstractClassGenerator {
 	}
 
 	private Object createHelper() {
+		// 校验callbackTypes、filter是否为空，以及为空时的处理
 		preValidate();
+		// 通过newInstance方法来创建EnhancerKey对象,正常情况下，只需要new一个对象就可以调用方法了，但是Key_Factory是一个EnhancerKey类型，是一个内部接口，需要动态代理来实现 ，最终是为了调用newInstance方法
 		Object key = KEY_FACTORY.newInstance((superclass != null) ? superclass.getName() : null,
 				ReflectUtils.getNames(interfaces),
 				filter == ALL_ZERO ? null : new WeakCacheKey<CallbackFilter>(filter),
@@ -568,7 +543,9 @@ public class Enhancer extends AbstractClassGenerator {
 				useFactory,
 				interceptDuringConstruction,
 				serialVersionUID);
+		// 设置当前enhancer的代理类的key标识
 		this.currentKey = key;
+		// 调用父类即AbstractClassGenerator创建代理类
 		Object result = super.create(key);
 		return result;
 	}
@@ -654,21 +631,27 @@ public class Enhancer extends AbstractClassGenerator {
 	}
 
 	public void generateClass(ClassVisitor v) throws Exception {
+		// 声明需要代理的类或者接口
 		Class sc = (superclass == null) ? Object.class : superclass;
-
+		// 检查final类无法被继承
 		if (TypeUtils.isFinal(sc.getModifiers()))
 			throw new IllegalArgumentException("Cannot subclass final class " + sc.getName());
+		// 找到该类所有声明了的构造函数
 		List constructors = new ArrayList(Arrays.asList(sc.getDeclaredConstructors()));
+		// 去掉private之类的不能被继承的构造函数
 		filterConstructors(sc, constructors);
 
 		// Order is very important: must add superclass, then
 		// its superclass chain, then each interface and
 		// its superinterfaces.
+		// 声明代理类方法的集合
 		List actualMethods = new ArrayList();
+		// 声明代理接口 接口方法集合
 		List interfaceMethods = new ArrayList();
+		// 声明所有必须为public的方法集合 这儿主要是代理接口的接口方法
 		final Set forcePublic = new HashSet();
 		getMethods(sc, interfaces, actualMethods, interfaceMethods, forcePublic);
-
+		// 对所有代理类方法修饰符做处理
 		List methods = CollectionUtils.transform(actualMethods, new Transformer() {
 			public Object transform(Object value) {
 				Method method = (Method) value;
@@ -683,7 +666,7 @@ public class Enhancer extends AbstractClassGenerator {
 				return ReflectUtils.getMethodInfo(method, modifiers);
 			}
 		});
-
+		// 创建类写入器
 		ClassEmitter e = new ClassEmitter(v);
 		if (currentData == null) {
 			e.begin_class(Constants.V1_8,

@@ -23,6 +23,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ * 用于两种或者更多种类型之间转换的通用转换器接口
  * Generic converter interface for converting between two or more types.
  *
  * <p>This is the most flexible of the Converter SPI interfaces, but also the most complex.
@@ -48,6 +49,7 @@ import org.springframework.util.Assert;
 public interface GenericConverter {
 
 	/**
+	 * 返回转换器集合可以转换源和目标的类型
 	 * Return the source and target types that this converter can convert between.
 	 * <p>Each entry is a convertible source-to-target type pair.
 	 * <p>For {@link ConditionalConverter conditional converters} this method may return
@@ -57,6 +59,7 @@ public interface GenericConverter {
 	Set<ConvertiblePair> getConvertibleTypes();
 
 	/**
+	 * 转换源到目标类型的描述
 	 * Convert the source object to the targetType described by the {@code TypeDescriptor}.
 	 * @param source the source object to convert (may be {@code null})
 	 * @param sourceType the type descriptor of the field we are converting from
@@ -68,6 +71,7 @@ public interface GenericConverter {
 
 
 	/**
+	 * 组件一个源到目的组合
 	 * Holder for a source-to-target class pair.
 	 */
 	final class ConvertiblePair {

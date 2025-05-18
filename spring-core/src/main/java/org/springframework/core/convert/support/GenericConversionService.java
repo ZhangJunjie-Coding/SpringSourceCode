@@ -82,16 +82,24 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 	// ConverterRegistry implementation
 
+	/**
+	 * 添加converter
+	 * @param converter
+	 */
 	@Override
 	public void addConverter(Converter<?, ?> converter) {
+		// 获取对应的source、target类型
 		ResolvableType[] typeInfo = getRequiredTypeInfo(converter.getClass(), Converter.class);
+		// 如果对应的类型为空并且converter是代理，再次尝试获取
 		if (typeInfo == null && converter instanceof DecoratingProxy) {
 			typeInfo = getRequiredTypeInfo(((DecoratingProxy) converter).getDecoratedClass(), Converter.class);
 		}
+		// 如果target为null 那么抛出异常
 		if (typeInfo == null) {
 			throw new IllegalArgumentException("Unable to determine source type <S> and target type <T> for your " +
 					"Converter [" + converter.getClass().getName() + "]; does the class parameterize those types?");
 		}
+//		添加到内部类Converters里面进行管理
 		addConverter(new ConverterAdapter(converter, typeInfo[0], typeInfo[1]));
 	}
 
@@ -103,7 +111,9 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 	@Override
 	public void addConverter(GenericConverter converter) {
+		// 加到GenericConversionService自定义类Converters里面
 		this.converters.add(converter);
+		// 将缓存清空
 		invalidateCache();
 	}
 

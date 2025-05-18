@@ -16,31 +16,14 @@
 
 package org.springframework.util;
 
+import org.springframework.lang.Nullable;
+
 import java.beans.Introspector;
 import java.io.Closeable;
 import java.io.Externalizable;
 import java.io.Serializable;
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Proxy;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.StringJoiner;
-
-import org.springframework.lang.Nullable;
+import java.lang.reflect.*;
+import java.util.*;
 
 /**
  * Miscellaneous {@code java.lang.Class} utility methods.
@@ -894,6 +877,7 @@ public abstract class ClassUtils {
 	 * @return the user-defined class
 	 */
 	public static Class<?> getUserClass(Class<?> clazz) {
+		// 如果包含有CGLIB的名字符号，尝试获取父类
 		if (clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {
 			Class<?> superclass = clazz.getSuperclass();
 			if (superclass != null && superclass != Object.class) {
@@ -1050,10 +1034,12 @@ public abstract class ClassUtils {
 	 */
 	public static String getQualifiedMethodName(Method method, @Nullable Class<?> clazz) {
 		Assert.notNull(method, "Method must not be null");
+		// 如果clazz不为null 就用clazz，否则使用声明method的类对象啊，然后提取出类对象的全类名，加上'.',再加上方法名,最后返回出去
 		return (clazz != null ? clazz : method.getDeclaringClass()).getName() + '.' + method.getName();
 	}
 
 	/**
+	 * 确定给定的类是否具有代用给定签名的公共构造函数
 	 * Determine whether the given class has a public constructor with the given signature.
 	 * <p>Essentially translates {@code NoSuchMethodException} to "false".
 	 * @param clazz the clazz to analyze
@@ -1062,6 +1048,7 @@ public abstract class ClassUtils {
 	 * @see Class#getConstructor
 	 */
 	public static boolean hasConstructor(Class<?> clazz, Class<?>... paramTypes) {
+		// 获取paramTypes的clazz的构造函数对象，如果不为null 就返回true
 		return (getConstructorIfAvailable(clazz, paramTypes) != null);
 	}
 
