@@ -25,6 +25,9 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.MethodBeforeAdvice;
 
 /**
+ * 前置通知的适配器。支持前置通知类。有一个getInterceptor方法; 将Advisor适配MethodInterceptor,
+ * Advisor持有Advice类型的实例，获MethodBeforeAdvice,
+ * MethodBeforeAdvice适配MethodBeforeAdviceInterceptor。AOP的拦截过程通过MethodInterceptor来完成
  * Adapter to enable {@link org.springframework.aop.MethodBeforeAdvice}
  * to be used in the Spring AOP framework.
  *

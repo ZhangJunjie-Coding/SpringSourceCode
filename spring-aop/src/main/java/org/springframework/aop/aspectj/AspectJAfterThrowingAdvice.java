@@ -16,15 +16,15 @@
 
 package org.springframework.aop.aspectj;
 
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.AfterAdvice;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-
-import org.springframework.aop.AfterAdvice;
-
 /**
+ * 使用AspectJ Around注解的后置通知类型
  * Spring AOP advice wrapping an AspectJ after-throwing advice method.
  *
  * @author Rod Johnson
@@ -59,10 +59,12 @@ public class AspectJAfterThrowingAdvice extends AbstractAspectJAdvice
 	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		try {
+			// 执行下一个通知/拦截器 methodInvocation
 			return mi.proceed();
-		}
-		catch (Throwable ex) {
+			// 抛出异常
+		} catch (Throwable ex) {
 			if (shouldInvokeOnThrowing(ex)) {
+				// 执行异常通知
 				invokeAdviceMethod(getJoinPointMatch(), null, ex);
 			}
 			throw ex;

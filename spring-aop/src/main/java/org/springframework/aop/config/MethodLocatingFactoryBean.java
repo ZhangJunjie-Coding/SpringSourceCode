@@ -26,6 +26,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
+ * 通过bean和方法名定位到一个指定方法
  * {@link FactoryBean} implementation that locates a {@link Method} on a specified bean.
  *
  * @author Rob Harrop

@@ -104,6 +104,7 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 	@Override
 	public Advice getAdvice() {
 		Advice advice = this.advice;
+		// 非Spring环境一般手动set进来，所以就直接返回
 		if (advice != null) {
 			return advice;
 		}
@@ -111,12 +112,14 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 		Assert.state(this.adviceBeanName != null, "'adviceBeanName' must be specified");
 		Assert.state(this.beanFactory != null, "BeanFactory must be set to resolve 'adviceBeanName'");
 
+		// 若bean是单例的，那就没什么好说的，直接去工厂里拿出来就完事了(Advice.class),有可能返回null
 		if (this.beanFactory.isSingleton(this.adviceBeanName)) {
 			// Rely on singleton semantics provided by the factory.
 			advice = this.beanFactory.getBean(this.adviceBeanName, Advice.class);
 			this.advice = advice;
 			return advice;
 		}
+		// 若是多例的，就加锁，然后调用getBean()给他生成一个新的实例即可
 		else {
 			// No singleton guarantees from the factory -> let's lock locally but
 			// reuse the factory's singleton lock, just in case a lazy dependency

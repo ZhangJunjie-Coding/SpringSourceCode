@@ -46,12 +46,13 @@ public abstract class AopProxyUtils {
 
 	/**
 	 * Obtain the singleton target object behind the given proxy, if any.
+	 *
 	 * @param candidate the (potential) proxy to check
 	 * @return the singleton target object managed in a {@link SingletonTargetSource},
 	 * or {@code null} in any other case (not a proxy, not an existing singleton target)
-	 * @since 4.3.8
 	 * @see Advised#getTargetSource()
 	 * @see SingletonTargetSource#getTarget()
+	 * @since 4.3.8
 	 */
 	@Nullable
 	public static Object getSingletonTarget(Object candidate) {
@@ -68,6 +69,7 @@ public abstract class AopProxyUtils {
 	 * Determine the ultimate target class of the given bean instance, traversing
 	 * not only a top-level proxy but any number of nested proxies as well &mdash;
 	 * as long as possible without side effects, that is, just for singleton targets.
+	 *
 	 * @param candidate the instance to check (might be an AOP proxy)
 	 * @return the ultimate target class (or the plain class of the given
 	 * object as fallback; never {@code null})
@@ -93,6 +95,7 @@ public abstract class AopProxyUtils {
 	 * <p>This will always add the {@link Advised} interface unless the AdvisedSupport's
 	 * {@link AdvisedSupport#setOpaque "opaque"} flag is on. Always adds the
 	 * {@link org.springframework.aop.SpringProxy} marker interface.
+	 *
 	 * @param advised the proxy config
 	 * @return the complete set of interfaces to proxy
 	 * @see SpringProxy
@@ -103,58 +106,75 @@ public abstract class AopProxyUtils {
 	}
 
 	/**
+	 * 获取目标类上的接口并且判断是否需要添加SpringProxy Advised DecoratingProxy接口
 	 * Determine the complete set of interfaces to proxy for the given AOP configuration.
 	 * <p>This will always add the {@link Advised} interface unless the AdvisedSupport's
 	 * {@link AdvisedSupport#setOpaque "opaque"} flag is on. Always adds the
 	 * {@link org.springframework.aop.SpringProxy} marker interface.
-	 * @param advised the proxy config
+	 *
+	 * @param advised         the proxy config
 	 * @param decoratingProxy whether to expose the {@link DecoratingProxy} interface
 	 * @return the complete set of interfaces to proxy
-	 * @since 4.3
 	 * @see SpringProxy
 	 * @see Advised
 	 * @see DecoratingProxy
+	 * @since 4.3
 	 */
 	static Class<?>[] completeProxiedInterfaces(AdvisedSupport advised, boolean decoratingProxy) {
+		// 获取AdvisedSupport类型中目标类的接口
 		Class<?>[] specifiedInterfaces = advised.getProxiedInterfaces();
+		// 如果目标类没有实现接口的话
 		if (specifiedInterfaces.length == 0) {
-			// No user-specified interfaces: check whether target class is an interface.
+			// No user-specified interfaces: check whether target class is an interface. 获取目标类
 			Class<?> targetClass = advised.getTargetClass();
 			if (targetClass != null) {
+				// 如果目标类是接口，则把目标类添加到AdvisedSupport的接口集合中
 				if (targetClass.isInterface()) {
 					advised.setInterfaces(targetClass);
-				}
+				}// 如果是Proxy类型
 				else if (Proxy.isProxyClass(targetClass)) {
 					advised.setInterfaces(targetClass.getInterfaces());
-				}
+				}// 重新获取接口
 				specifiedInterfaces = advised.getProxiedInterfaces();
 			}
 		}
+		// 接口中有没有SpringProxy类型的接口
+		// 是否需要添加SpringProxy接口
 		boolean addSpringProxy = !advised.isInterfaceProxied(SpringProxy.class);
+		// isOpaque 代表生成的代理是否避免转化为Advised类型 默认为false 如果目标类没有实现Advised接口
+		// 是否需要添加 Advised接口
 		boolean addAdvised = !advised.isOpaque() && !advised.isInterfaceProxied(Advised.class);
+		// 是否需要添加DecoratingProxy接口
 		boolean addDecoratingProxy = (decoratingProxy && !advised.isInterfaceProxied(DecoratingProxy.class));
 		int nonUserIfcCount = 0;
+		// 需要添加SpringProxy接口
 		if (addSpringProxy) {
 			nonUserIfcCount++;
 		}
+		// 需要添加通知
 		if (addAdvised) {
 			nonUserIfcCount++;
 		}
+		// 需要添加DescoratingProxy接口
 		if (addDecoratingProxy) {
 			nonUserIfcCount++;
 		}
 		Class<?>[] proxiedInterfaces = new Class<?>[specifiedInterfaces.length + nonUserIfcCount];
+		// 扩展接口数组
 		System.arraycopy(specifiedInterfaces, 0, proxiedInterfaces, 0, specifiedInterfaces.length);
 		int index = specifiedInterfaces.length;
 		if (addSpringProxy) {
+			// 为目标对象接口中添加SpringProxy接口
 			proxiedInterfaces[index] = SpringProxy.class;
 			index++;
 		}
 		if (addAdvised) {
+			// 为目标对象接口中添加Advised接口
 			proxiedInterfaces[index] = Advised.class;
 			index++;
 		}
 		if (addDecoratingProxy) {
+			// 为目标对象接口中添加DecoratingProxy接口
 			proxiedInterfaces[index] = DecoratingProxy.class;
 		}
 		return proxiedInterfaces;
@@ -163,6 +183,7 @@ public abstract class AopProxyUtils {
 	/**
 	 * Extract the user-specified interfaces that the given proxy implements,
 	 * i.e. all non-Advised interfaces that the proxy implements.
+	 *
 	 * @param proxy the proxy to analyze (usually a JDK dynamic proxy)
 	 * @return all user-specified interfaces that the proxy implements,
 	 * in the original order (never {@code null} or empty)
@@ -214,7 +235,8 @@ public abstract class AopProxyUtils {
 	 * Adapt the given arguments to the target signature in the given method,
 	 * if necessary: in particular, if a given vararg argument array does not
 	 * match the array type of the declared vararg parameter in the method.
-	 * @param method the target method
+	 *
+	 * @param method    the target method
 	 * @param arguments the given arguments
 	 * @return a cloned argument array, or the original if no adaptation is needed
 	 * @since 4.2.3

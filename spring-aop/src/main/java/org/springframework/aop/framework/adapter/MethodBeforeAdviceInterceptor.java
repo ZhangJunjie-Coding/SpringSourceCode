@@ -16,14 +16,13 @@
 
 package org.springframework.aop.framework.adapter;
 
-import java.io.Serializable;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.aop.BeforeAdvice;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.util.Assert;
+
+import java.io.Serializable;
 
 /**
  * Interceptor to wrap a {@link MethodBeforeAdvice}.
@@ -40,7 +39,7 @@ public class MethodBeforeAdviceInterceptor implements MethodInterceptor, BeforeA
 	private final MethodBeforeAdvice advice;
 
 
-	/**
+	/** 为指定的advice创建对应的MethodBeforeAdviceInterceptor对象
 	 * Create a new MethodBeforeAdviceInterceptor for the given advice.
 	 * @param advice the MethodBeforeAdvice to wrap
 	 */
@@ -49,10 +48,12 @@ public class MethodBeforeAdviceInterceptor implements MethodInterceptor, BeforeA
 		this.advice = advice;
 	}
 
-
+	// 这个invoke方法试拦截器的回调方法，会在代理对应的方法被调用时触发回调
 	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
+		// 执行前置通知的方法
 		this.advice.before(mi.getMethod(), mi.getArguments(), mi.getThis());
+		// 执行下一个通知/拦截器,但是该拦截器是最后一个了，所以会调用目标方法(这里是否调用目标方法 要根据通知的配置顺序，这里我是将before配置在around通知后面了)
 		return mi.proceed();
 	}
 

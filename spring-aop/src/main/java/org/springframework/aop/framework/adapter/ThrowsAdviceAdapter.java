@@ -25,6 +25,9 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.ThrowsAdvice;
 
 /**
+ * 后置异常通知的适配器。支持后置异常通知类。有一个getInterceptor方法：将Advisor适配MethodInterceptor。
+ * Advisor持有Advice类型的实例，获取ThrowsAdvice,将ThrowsAdvice适配为ThrowsAdviceInterceptor。
+ * AOP的栏截过程通过MethodInterceptor来完成
  * Adapter to enable {@link org.springframework.aop.MethodBeforeAdvice}
  * to be used in the Spring AOP framework.
  *

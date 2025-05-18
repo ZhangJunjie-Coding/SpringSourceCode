@@ -39,11 +39,12 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
  */
 @SuppressWarnings("serial")
 public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Serializable {
-
+	// 持有一个AdvisorAdapter的List，这个List中的adapter是与实现Spring AOP的advice增强功能相对应的
 	private final List<AdvisorAdapter> adapters = new ArrayList<>(3);
 
 
 	/**
+	 * 此方法把已有的advice实现的adapter加入进来 （为什么只有三个？ ）
 	 * Create a new DefaultAdvisorAdapterRegistry, registering well-known adapters.
 	 */
 	public DefaultAdvisorAdapterRegistry() {
@@ -55,9 +56,11 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
 
 	@Override
 	public Advisor wrap(Object adviceObject) throws UnknownAdviceTypeException {
+		// 如果要封装的对象本身就是Advisor类型，那么无须做任何处理
 		if (adviceObject instanceof Advisor) {
 			return (Advisor) adviceObject;
 		}
+		// 如果类型不是Advisor和Advice两种类型的数据，那么将不能进行封装
 		if (!(adviceObject instanceof Advice)) {
 			throw new UnknownAdviceTypeException(adviceObject);
 		}
@@ -75,15 +78,19 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
 		throw new UnknownAdviceTypeException(advice);
 	}
 
+	// 将Advisor转换为MethodInterceptor
 	@Override
 	public MethodInterceptor[] getInterceptors(Advisor advisor) throws UnknownAdviceTypeException {
 		List<MethodInterceptor> interceptors = new ArrayList<>(3);
+		// 从Advisor中获取advice
 		Advice advice = advisor.getAdvice();
 		if (advice instanceof MethodInterceptor) {
 			interceptors.add((MethodInterceptor) advice);
 		}
 		for (AdvisorAdapter adapter : this.adapters) {
 			if (adapter.supportsAdvice(advice)) {
+				// 转换为对应的MethodInterceptor类型
+				// AfterReturningAdviceAdapter MethodBeforeAdviceAdapter ThrowsAdviceAdapter
 				interceptors.add(adapter.getInterceptor(advisor));
 			}
 		}
@@ -92,7 +99,7 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
 		}
 		return interceptors.toArray(new MethodInterceptor[0]);
 	}
-
+	// 新增的Advisor适配器
 	@Override
 	public void registerAdvisorAdapter(AdvisorAdapter adapter) {
 		this.adapters.add(adapter);
