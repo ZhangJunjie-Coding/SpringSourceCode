@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:zhang="http://www.zhang.com/schema/user"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.zhang.com/schema/user
+		http://www.zhang.com/schema/user/user.xsd">
+
+	<bean id="customer" class="com.zhang.selfEditor.Customer">
+		<property name="name" value="zhangsan"></property>
+		<property name="address" value="河北省_邯郸市_武安市"></property>
+	</bean>
+
+<!--	<bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">-->
+<!--		<property name="propertyEditorRegistrars">-->
+<!--			<list>-->
+<!--				<bean class="com.zhang.selfEditor.AddressPropertyEditorRegistrar"></bean>-->
+<!--			</list>-->
+<!--		</property>-->
+<!--	</bean>-->
+
+	<bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
+		<property name="customEditors">
+			<map>
+				<entry key="com.zhang.selfEditor.Address">
+					<value>com.zhang.selfEditor.AddressPropertyEditor</value>
+				</entry>
+			</map>
+		</property>
+	</bean>
+
+</beans>
+

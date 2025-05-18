@@ -1,0 +1,30 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:util="http://www.springframework.org/schema/util"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd">
+
+	<util:map id="map">
+		<entry key="name" value="zhangjunjie"></entry>
+	</util:map>
+	<util:map id="myMap">
+		<entry key="key1" value="value1"></entry>
+		<entry key="key2" value-ref="book2"></entry>
+		<entry key="key03">
+			<bean class="com.zhang.populateBean.Book">
+				<property name="name" value="西游记"></property>
+				<property name="author" value="吴承恩"></property>
+				<property name="price" value="100"></property>
+			</bean>
+		</entry>
+	</util:map>
+	<bean id="book2" class="com.zhang.populateBean.Book">
+		<property name="name" value="jvm"></property>
+		<property name="author" value="zjj"></property>
+		<property name="price" value="1299"></property>
+	</bean>
+
+</beans>

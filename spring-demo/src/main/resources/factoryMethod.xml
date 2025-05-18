@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:zhang="http://www.zhang.com/schema/user"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.zhang.com/schema/user
+		http://www.zhang.com/schema/user/user.xsd">
+	<!--静态工厂-->
+	<bean id="person" class="com.zhang.factoryMethod.PersonStaticFactory" factory-method="getPerson">
+		<!-- constructor-arg: 可以为方法指定参数-->
+		<constructor-arg value="lisi"></constructor-argin>
+	</bean>
+	<bean id="personInstanceFactory" class="com.zhang.factoryMethod.PersonInstanceFactory"></bean>
+
+	<!--实例工厂-->
+	<!--
+	factory-bean: 指定使用哪个工厂实例
+	factory-method: 指定使用哪个工厂实例方法
+	-->
+	<bean id="person2" class="com.zhang.factoryMethod.Person" factory-bean="personInstanceFactory" factory-method="getPerson">
+		<constructor-arg value="wangwu"></constructor-arg>
+	</bean>
+
+
+</beans>
+

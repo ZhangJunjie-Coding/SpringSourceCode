@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:zhang="http://www.zhang.com/schema/user"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.zhang.com/schema/user
+		http://www.zhang.com/schema/user/user.xsd">
+
+	<bean id="apple" class="com.zhang.methodOverrides.lookup.Apple" scope="prototype">
+		<!--		<property name="banana" ref="banana"></property>-->
+	</bean>
+
+	<!--	<bean id="banana" class="com.zhang.methodOverrides.lookup.Banana"></bean>-->
+
+	<bean id="fruitplate1" class="com.zhang.methodOverrides.lookup.FruitPlate">
+		<lookup-method name="getFruit" bean="apple"></lookup-method>
+	</bean>
+	<!--	<bean id="fruitplate2" class="com.zhang.methodOverrides.lookup.FruitPlate">-->
+	<!--		<lookup-method name="getFruit" bean="banana"></lookup-method>-->
+	<!--	</bean>-->
+
+
+	<bean id="originalDog" class="com.zhang.methodOverrides.replace.OriginalDog">
+		<replaced-method name="sayHello" replacer="replaceDog"></replaced-method>
+		<replaced-method name="sayHello" replacer="replaceDog">
+			<arg-type>java.lang.String</arg-type>
+		</replaced-method>
+	</bean>
+
+	<bean id="replaceDog" class="com.zhang.methodOverrides.replace.ReplaceDog">
+	</bean>
+</beans>
+

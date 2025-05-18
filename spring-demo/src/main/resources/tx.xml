@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:aop="http://www.springframework.org/schema/aop"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:tx="http://www.springframework.org/schema/tx"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/tx
+        https://www.springframework.org/schema/tx/spring-tx.xsd">
+
+	<context:property-placeholder location="classpath:dbconfig.properties"></context:property-placeholder>
+
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driver}"></property>
+		<property name="url" value="${jdbc.url}"></property>
+		<property name="username" value="${jdbc.username}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+	</bean>
+
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+
+	<bean id="bookService" class="com.zhang.txa.xml.service.BookService">
+		<property name="bookDao" ref="bookDao"></property>
+	</bean>
+
+	<bean id="bookDao" class="com.zhang.txa.xml.dao.BookDao">
+		<property name="jdbcTemplate" ref="jdbcTemplate"></property>
+	</bean>
+	<aop:config>
+		<aop:pointcut id="txPoint" expression="execution(* com.zhang.txa.xml.*.*.*(..))"/>
+		<aop:advisor advice-ref="myAdvice" pointcut-ref="txPoint"></aop:advisor>
+	</aop:config>
+
+	<tx:advice id="myAdvice" transaction-manager="transactionManager">
+		<!-- 相当于@Transactional注解 -->
+		<tx:attributes>
+			<tx:method name="checkout" propagation="REQUIRED"/>
+			<tx:method name="updateStock" propagation="REQUIRES_NEW"/>
+		</tx:attributes>
+	</tx:advice>
+</beans>
+
